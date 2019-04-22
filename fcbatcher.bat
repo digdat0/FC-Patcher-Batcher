@@ -116,13 +116,30 @@ ECHO   Firmware Filename    : %filename%
 ECHO   Aircraft Type        : %acname%
 ECHO   Firmware Version     : %acversion%
 ECHO.
+ECHO   Hidden Testing Options: (E, D, A, P, Q, S, I)
+ECHO   ExtractBin, DumldoreDL, Adb1ststep, ParamsEdit, patch_seQuence, Setpath, Installdummy 
+ECHO.
 SET /P M=Is this information right? Y/N: 
 IF %M%==Y GOTO MAIN3
 IF %M%==y GOTO MAIN3
 IF %M%==N GOTO MAIN
 IF %M%==n GOTO MAIN
-IF %M%==Q GOTO EOF
-IF %M%==q GOTO EOF
+IF %M%==x GOTO EOF
+IF %M%==X GOTO EOF
+IF %M%==e GOTO EXTRACTBIN
+IF %M%==E GOTO EXTRACTBIN
+IF %M%==d GOTO DLDD REM DUMLORE JUMP TO
+IF %M%==D GOTO DLDD 
+IF %M%==a GOTO ADB1 
+IF %M%==A GOTO ADB1
+IF %M%==p GOTO PARAMSFILE 
+IF %M%==P GOTO PARAMSFILE
+IF %M%==Q GOTO SEQ REM FC_patch_sequence_for_dummy_verify.sh
+IF %M%==q GOTO SEQ
+IF %M%==s GOTO PATH 
+IF %M%==S GOTO PATH
+IF %M%==i GOTO ADBINSTALLDUMMY  
+IF %M%==I GOTO ADBINSTALLDUMMY
 :MAIN3
 @ECHO OFF
 python --version 2>NUL
@@ -150,7 +167,7 @@ ECHO.
 ECHO  Downloading image.py ..
 ECHO.
 ECHO ------------------------------------------------------------------------------
-IF EXIST "image.py" (
+IF EXIST "tools\image.py" (
 GOTO DL2
 ) ELSE (
 ECHO.
@@ -158,7 +175,6 @@ ECHO Downloading image.py tool, please wait ..
 ECHO.
 java -jar download.jar https://github.com/fvantienen/dji_rev/raw/master/tools/image.py image.py
 )
-TIMEOUT 2 >nul
 GOTO DL2
 :DL2
 CLS
@@ -170,7 +186,7 @@ ECHO.
 ECHO  Downloading dji_mvfc_fwpak.py ..
 ECHO.
 ECHO ------------------------------------------------------------------------------
-IF EXIST "dji_mvfc_fwpak.py" (
+IF EXIST "tools\dji_mvfc_fwpak.py" (
 GOTO DL3
 ) ELSE (
 ECHO.
@@ -178,7 +194,6 @@ ECHO Downloading dji_mvfc_fwpak.py tool, please wait ..
 ECHO.
 java -jar download.jar https://github.com/o-gs/dji-firmware-tools/raw/master/dji_mvfc_fwpak.py dji_mvfc_fwpak.py
 )
-TIMEOUT 2 >nul
 GOTO DL3
 :DL3
 CLS
@@ -190,15 +205,14 @@ ECHO.
 ECHO  Downloading dji_flyc_param_ed.py ..
 ECHO.
 ECHO ------------------------------------------------------------------------------
-IF EXIST "dji_flyc_param_ed.py" (
-GOTO EXTRACTBIN
+IF EXIST "tools\dji_flyc_param_ed.py" (
+GOTO DL4
 ) ELSE (
 ECHO.
 ECHO Downloading dji_flyc_param_ed.py tool, please wait .. 
 ECHO.
 java -jar download.jar https://github.com/o-gs/dji-firmware-tools/raw/master/dji_flyc_param_ed.py dji_flyc_param_ed.py
 )
-TIMEOUT 2 >nul
 GOTO DL4
 :DL4
 CLS
@@ -210,7 +224,7 @@ ECHO.
 ECHO  Downloading FC_patch_sequence_for_dummy_verify.sh ..
 ECHO.
 ECHO ------------------------------------------------------------------------------
-IF EXIST "FC_patch_sequence_for_dummy_verify.sh" (
+IF EXIST "tools\FC_patch_sequence_for_dummy_verify.sh" (
 GOTO DL5
 ) ELSE (
 ECHO.
@@ -218,7 +232,6 @@ ECHO Downloading FC_patch_sequence_for_dummy_verify.sh tool, please wait ..
 ECHO.
 java -jar download.jar https://github.com/o-gs/DJI_FC_Patcher/raw/master/FC_patch_sequence_for_dummy_verify.sh FC_patch_sequence_for_dummy_verify.sh
 )
-TIMEOUT 2 >nul
 GOTO DL5
 :DL5
 CLS
@@ -230,15 +243,14 @@ ECHO.
 ECHO  Downloading patcher.py ..
 ECHO.
 ECHO ------------------------------------------------------------------------------
-IF EXIST "FC_patch_sequence_for_dummy_verify.sh" (
-GOTO DL5
+IF EXIST "tools\patcher.py" (
+GOTO DL6
 ) ELSE (
 ECHO.
 ECHO Downloading patcher.py tool, please wait .. 
 ECHO.
 java -jar download.jar https://github.com/o-gs/DJI_FC_Patcher/raw/master/patcher.py patcher.py
 )
-TIMEOUT 2 >nul
 GOTO DL6
 :DL6
 CLS
@@ -250,15 +262,33 @@ ECHO.
 ECHO  Downloading patch_wm220_0306.py .. right now this is for Mavic only
 ECHO.
 ECHO ------------------------------------------------------------------------------
-IF EXIST "patch_wm220_0306.py" (
-GOTO DL5
+IF EXIST "tools\patch_wm220_0306.py" (
+GOTO DL7
 ) ELSE (
 ECHO.
 ECHO Downloading patch_wm220_0306.py tool, please wait .. 
 ECHO.
 java -jar download.jar https://github.com/o-gs/DJI_FC_Patcher/raw/master/patch_wm220_0306.py patch_wm220_0306.py
 )
-TIMEOUT 2 >nul
+GOTO DL7
+:DL7
+CLS
+ECHO.
+ECHO ------------------------------------------------------------------------------
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
+ECHO ------------------------------------------------------------------------------
+ECHO. 
+ECHO  Downloading patch_wm220_0306.py .. right now this is for Mavic only
+ECHO.
+ECHO ------------------------------------------------------------------------------
+IF EXIST "tools\dummy_verify.sh" (
+GOTO EXTRACTBIN
+) ELSE (
+ECHO.
+ECHO Downloading dummy_verify.sh tool, please wait .. 
+ECHO.
+java -jar download.jar https://github.com/o-gs/DJI_FC_Patcher/raw/master/dummy_verify.sh dummy_verify.sh
+)
 GOTO EXTRACTBIN
 :EXTRACTBIN
 CLS
@@ -282,6 +312,7 @@ copy dji_flyc_param_ed.py tools
 copy %filename% tools
 copy 7z.exe tools
 copy image.py tools
+copy dummy_verify.sh tools
 cd tools
 md fwextract
 7z.exe x %filename%
@@ -499,13 +530,14 @@ ECHO ---------------------------------------------------------------------------
 ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
 ECHO ------------------------------------------------------------------------------
 ECHO. 
-ECHO  We are now attempting to connect to the %acname%. 
+ECHO  ADB in the house ... We are now attempting to connect to the %acname%. 
 ECHO.
 ECHO ------------------------------------------------------------------------------
 TIMEOUT 2>nul
 cd adb
 adb shell REM lets test before remounting
 adb exit
+adb root
 adb shell mount -o remount,rw /vendor
 CLS
 ECHO.
@@ -513,7 +545,7 @@ ECHO ---------------------------------------------------------------------------
 ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
 ECHO ------------------------------------------------------------------------------
 ECHO. 
-ECHO  Mounted the drive 
+ECHO  ADB in the house ... Mounted the drive 
 ECHO.
 ECHO ------------------------------------------------------------------------------
 TIMEOUT 2 >nul
@@ -524,7 +556,7 @@ ECHO ---------------------------------------------------------------------------
 ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
 ECHO ------------------------------------------------------------------------------
 ECHO. 
-ECHO  Made the directory 
+ECHO  ADB in the house ... Made the directory 
 ECHO.
 ECHO ------------------------------------------------------------------------------
 TIMEOUT 2 >nul
@@ -535,10 +567,11 @@ ECHO ---------------------------------------------------------------------------
 ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
 ECHO ------------------------------------------------------------------------------
 ECHO. 
-ECHO  Copied the file 
+ECHO  ADB in the house ... Copied the file 
 ECHO.
 ECHO ------------------------------------------------------------------------------
 TIMEOUT 2 >nul
+adb root
 adb shell cd /vendor/bin/
 CLS
 ECHO.
@@ -546,7 +579,7 @@ ECHO ---------------------------------------------------------------------------
 ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
 ECHO ------------------------------------------------------------------------------
 ECHO. 
-ECHO  Moved to the folder
+ECHO  ADB in the house ... Moved to the folder
 ECHO.
 ECHO ------------------------------------------------------------------------------
 TIMEOUT 2 >nul
@@ -558,7 +591,7 @@ ECHO ---------------------------------------------------------------------------
 ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
 ECHO ------------------------------------------------------------------------------
 ECHO. 
-ECHO  Verified firmware file
+ECHO  ADB in the house ... Verified firmware file
 ECHO.
 ECHO ------------------------------------------------------------------------------
 TIMEOUT 2 >nul
@@ -569,7 +602,7 @@ ECHO ---------------------------------------------------------------------------
 ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
 ECHO ------------------------------------------------------------------------------
 ECHO. 
-ECHO  Copied unsigned file
+ECHO  ADB in the house ... Copied unsigned file
 ECHO.
 ECHO ------------------------------------------------------------------------------
 TIMEOUT 2 >nul
@@ -579,11 +612,12 @@ ECHO ---------------------------------------------------------------------------
 ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
 ECHO ------------------------------------------------------------------------------
 ECHO. 
-ECHO  Cleaning up ...
+ECHO  ADB in the house ... Cleaning up ...
 ECHO.
 ECHO ------------------------------------------------------------------------------
 TIMEOUT 2 >nul
 ECHO OFF
+adb root
 adb shell cd /vendor/bin/
 adb shell rm 0306.unsig
 adb shell rm *.fw.sig
@@ -604,6 +638,7 @@ ECHO.
 ECHO ------------------------------------------------------------------------------
 ECHO.
 pause
+ECHO OFF
 copy 0306.unsig ..
 REM ADD BACK LATER WHEN REAL TEST **** del 0306.unsig
 cd ..
@@ -650,6 +685,7 @@ IF ERRORLEVEL 1 (
 CALL :RESOLVE4 %%file%selection%%%
 ECHO Selected file name: %filename4%
 python dji_flyc_param_ed.py -vv -x -b 0x420000 -m %filename4%
+copy %filename4% fwextract
 del dji_flyc_param_ed.py
 copy flyc_param_infos flyc_param_infos_stock_%acname%_%acversion%
 GOTO PARAMSFILE
@@ -665,12 +701,182 @@ ECHO.
 ECHO  This file is located in the tools folder. We will open it using notepad. Make 
 ECHO  your edits and save. After saving, tool will continue, press any key. 
 ECHO.
+ECHO  For information on parameters, visit the wiki at http://dji.retroroms.info/howto/
+ECHO.
 ECHO ------------------------------------------------------------------------------
 ECHO.
 PAUSE
 notepad.exe flyc_param_infos
 copy flyc_param_infos flyc_param_infos_modded_%acname%_%acversion%
-ECHO TOOW
+copy flyc_param_infos fwextract
+del flyc_param_infos
+GOTO PATH
+:PATH
+CLS
+ECHO.
+ECHO ------------------------------------------------------------------------------
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
+ECHO ------------------------------------------------------------------------------
+ECHO. 
+ECHO  We are now attempting to set the path to the folder batch file was ran
+ECHO.
+ECHO ------------------------------------------------------------------------------
+TIMEOUT 2>nul
+set PATH_TO_TOOLS=C:\fcpatcher   
+REM MAKE SURE THIS MATCHES THE FOLDER YOU RAN BATCH FILE FROM
 PAUSE
+GOTO SEQ
+:SEQ
+CLS
+ECHO.
+ECHO ------------------------------------------------------------------------------
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
+ECHO ------------------------------------------------------------------------------
+ECHO. 
+ECHO  We will now run the FC patch sequence for the dummy verify file
+ECHO.
+ECHO ------------------------------------------------------------------------------
+PAUSE
+cd fwextract
+FC_patch_sequence_for_dummy_verify.sh Mavic 03.02.44.08
+pause
+GOTO ADBINSTALLDUMMY
+:ADBINSTALLDUMMY
+CLS
+ECHO.
+ECHO ------------------------------------------------------------------------------
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
+ECHO ------------------------------------------------------------------------------
+ECHO. 
+ECHO  This step will install the dummy_verify.sh file on the aircraft. This will 
+ECHO  allow you to install your customized firmware.
+ECHO.
+ECHO  Now we need to connect to the aircraft. Plug it in via USB and power on (if
+ECHO  the aircraft isnt already on.
+ECHO.
+ECHO  After plugging in, wait about 30 seconds for the computer to recognize it. DO
+ECHO  not close this window. Do not power off the %acname%
+ECHO. 
+ECHO. After about 30-60 seconds, press the any key to continue.
+ECHO.
+ECHO ------------------------------------------------------------------------------
+PAUSE
+echo off
+cd adb
+adb devices REM lets test before remounting
+adb root
+adb shell mount -o remount,rw /vendor
+adb push dummy_verify.sh /vendor/bin/
+adb root
+adb shell cd /vendor/bin/
+adb shell chown root:root dummy_verify.sh
+adb shell chmod 755 dummy_verify.sh
+adb shell cp /sbin/dji_verify /vendor/bin/original_dji_verify_copy REM /sbin for 1.03.0100+, /system/bin for earlier on m1p
+adb shell sync
+adb shell mount -o remount,ro /vendor
+CLS
+ECHO.
+ECHO ------------------------------------------------------------------------------
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
+ECHO ------------------------------------------------------------------------------
+ECHO. 
+ECHO  We are pretty sure we managed to copy the right stuff to the %acname%
+ECHO.
+ECHO  Please turn off the aircraft. Leave the USB plugged in.
+ECHO. 
+ECHO. Turn the %acname% back on. After about 30-60 seconds, press any key to continue.
+ECHO.
+ECHO  This step will initiate the dummy verify to allow flashing.
+ECHO.
+ECHO ------------------------------------------------------------------------------
+PAUSE
+adb root
+adb shell mount -o bind /vendor/bin/dummy_verify.sh /sbin/dji_verify
+cd ..
+cd tools
+copy FC_patch_sequence_for_dummy_verify.sh fwextract
+copy patcher.py fwextract
+copy patch_wm220_0306.py fwextract
+GOTO DDLL
+:DDLL
+CLS
+ECHO.
+ECHO ------------------------------------------------------------------------------
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
+ECHO ------------------------------------------------------------------------------
+ECHO. 
+ECHO  If you've gotten here, you've done pretty good. You've done all the steps
+ECHO. properly and have flashable firmware file. You can now continue with flashing
+ECHO  your %acname% with the .bin file we created. You can use dumldore or dumlflasher
+ECHO  to accomplish the flashing process.
+ECHO.
+ECHO ------------------------------------------------------------------------------
+PAUSE
+GOTO DLDD
+:DLDD
+CLS
+ECHO.
+ECHO ------------------------------------------------------------------------------
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
+ECHO ------------------------------------------------------------------------------
+ECHO. 
+ECHO  Downloading dumldore3
+ECHO.
+ECHO ------------------------------------------------------------------------------
+IF EXIST "dumldore3.exe" (
+GOTO DLDR
+) ELSE (
+ECHO.
+ECHO Downloading DUMLdoreV3.zip tool, please wait .. 
+ECHO.
+java -jar download.jar https://github.com/jezzab/DUMLdore/releases/download/v3.20/DUMLdoreV3.zip DUMLdoreV3.zip
+)
+TIMEOUT 2 >nul
+GOTO DLDR
+:DLDR
+CLS
+ECHO.
+ECHO ------------------------------------------------------------------------------
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
+ECHO ------------------------------------------------------------------------------
+ECHO. 
+ECHO  Extracting files and running dumldore tool
+ECHO.
+ECHO ------------------------------------------------------------------------------
+copy 7z.exe tools
+cd tools
+7z.exe x dumldorev3.zip
+start dumldorev3.exe
+TIMEOUT 2 >nul
+CLS
+ECHO.
+ECHO ------------------------------------------------------------------------------
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
+ECHO ------------------------------------------------------------------------------
+ECHO. 
+ECHO  The dumldore tool should have opened. Chose to load firmware, navigate to
+ECHO  the file and press flash firmware. 
+ECHO.
+ECHO ------------------------------------------------------------------------------
+pause
+
+
+
+GOTO CREDITS
+:CREDITS
+CLS
+ECHO.
+ECHO ------------------------------------------------------------------------------
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
+ECHO ------------------------------------------------------------------------------
+ECHO. 
+ECHO  Credits .. alot of smart folk put in alot of work. I want to give kudos to 
+ECHO  all the OG's, Matioupi, mefistotelis, fvantienen and anyone else involved 
+ECHO  with making the toolset or associated tools. Here's to the community.
+ECHO                             respect -- digdat0
+ECHO.
+ECHO ------------------------------------------------------------------------------
+pause
+GOTO EOF
 :EOF
 EXIT
