@@ -17,6 +17,8 @@ javac -version >nul 2>&1 && ( GOTO:MAIN
 SET APPVER=1.0
 SET ORIGDATE=April 18, 2019
 SET SAVEDATE=%DATE%
+SET BUILDVERSION=03.02.44.99
+REM change build version + versions when new builds to update
 @ECHO OFF
 CLS
 ECHO.
@@ -24,19 +26,20 @@ ECHO ------------------------------------------------------------------------
 ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
 ECHO ------------------------------------------------------------------------
 ECHO  The tool will assist in the FC Patcher process. The FC patcher "process"
-ECHO  enables you to modify flight controller parameters on the newer versions
-ECHO  of firmware for DJI Mavic Pro,  Mavic Platinum (no sd card needed), 
-ECHO  Phantom 4 Std, Phanton 4 Pro, Phantom 4 Advanced, Inspire 2 and Spark.
+ECHO  was made by the OG's to help the community modify flight controller 
+ECHO  parameters on the newer versions of firmware for DJI Mavic Pro,  Mavic 
+ECHO  Platinum (no sd card needed), Phantom 4 Std, Phanton 4 Pro, Phantom 4 
+ECHO  Advanced, Inspire 2 and Spark.
 ECHO. 
 ECHO  The process isn't quick or easy. Lots of hard work was done to enable this.
+ECHO  Much respect to Matioupi, mefistotelis, fvantienen and the other og's.
 ECHO.
-ECHO. At a high level, we will extract the firmware, decrypt it, copy it to the
+ECHO. At a high level, we will root, extract the firmware, decrypt it, copy it to the
 ECHO  aircraft, use the aircraft to fake a signature, decrypt the file, then 
 ECHO  extract the flight controller and then you can modify it. Once that is done,
 ECHO  we will recompile it and then you can use dumldore to install on the aircraft.
-ECHO.
-ECHO  This could brick your drone, please know what you are doing. Press 
-ECHO  the any key to proceed.
+ECHO. 
+ECHO  Press the any key to proceed.
 ECHO. 
 ECHO ------------------------------------------------------------------------
 PAUSE
@@ -93,6 +96,74 @@ GOTO :EOF
 :RESOLVE4
 SET filename4=%1
 GOTO :EOF
+:MAIN1
+REM CALL :FILECHECK
+CLS
+ECHO.
+ECHO ------------------------------------------------------------------------------
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
+ECHO ------------------------------------------------------------------------------
+ECHO. 
+ECHO  Do you want to root your device? Say no if you have already rooted.
+ECHO.
+ECHO. If you dont know what this means, this tool may not be for you.
+ECHO.
+ECHO ------------------------------------------------------------------------------
+ECHO.
+SET /P M=Do you want to root your device? Y/N: 
+IF %M%==Y GOTO REWT
+IF %M%==y GOTO REWT
+IF %M%==N GOTO MAIN2
+IF %M%==n GOTO MAIN2
+IF %M%==x GOTO EOF
+IF %M%==X GOTO EOF
+:REWT
+CLS
+ECHO.
+ECHO ------------------------------------------------------------------------------
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
+ECHO ------------------------------------------------------------------------------
+ECHO. 
+ECHO  Downloading dumlracer
+ECHO.
+ECHO ------------------------------------------------------------------------------
+IF EXIST "dumlracer.exe" (
+GOTO DLDR
+) ELSE (
+ECHO.
+ECHO Downloading dumlracer tool, please wait .. 
+ECHO.
+java -jar download.jar https://github.com/CunningLogic/DUMLRacer/releases/download/v1.1.1/DUMLRacer.jar dumlracer.jar
+)
+TIMEOUT 2 >nul
+GOTO REWTN
+:REWTN
+CLS
+ECHO.
+ECHO ------------------------------------------------------------------------------
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
+ECHO ------------------------------------------------------------------------------
+ECHO. 
+ECHO  We will run dumlracer to try and root (credits to jcase)
+ECHO.
+ECHO ------------------------------------------------------------------------------
+ECHO.
+PAUSE
+cd tools
+java -jar dumlracer.jar AC
+CLS
+ECHO.
+ECHO ------------------------------------------------------------------------------
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
+ECHO ------------------------------------------------------------------------------
+ECHO. 
+ECHO  We are hopeful that you won both races, but arent too tired. If you lost the
+ECHO  race(s), please quit the tool, power off aircraft and back on and try again.
+ECHO.
+ECHO ------------------------------------------------------------------------------
+ECHO.
+pause
+GOTO MAIN2
 :MAIN2
 for /f "tokens=1-3* delims=_" %%A in ('dir /b /a-d "%filename%"') do (
   set filenamespec=%%~A_%%~B_%%~C_%%~D
@@ -213,7 +284,8 @@ ECHO Downloading dji_flyc_param_ed.py tool, please wait ..
 ECHO.
 java -jar download.jar https://github.com/o-gs/dji-firmware-tools/raw/master/dji_flyc_param_ed.py dji_flyc_param_ed.py
 )
-GOTO DL4
+GOTO DL5 
+REM SKIPPING .sh below to have custom one
 :DL4
 CLS
 ECHO.
@@ -268,7 +340,7 @@ GOTO DL7
 ECHO.
 ECHO Downloading patch_wm220_0306.py tool, please wait .. 
 ECHO.
-java -jar download.jar https://github.com/o-gs/DJI_FC_Patcher/raw/master/patch_wm220_0306.py patch_wm220_0306.py
+java -jar download.jar https://github.com/o-gs/DJI_FC_Patcher/blob/master/patch_wm220_0306.py patch_wm220_0306.py
 )
 GOTO DL7
 :DL7
@@ -278,7 +350,7 @@ ECHO ---------------------------------------------------------------------------
 ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
 ECHO ------------------------------------------------------------------------------
 ECHO. 
-ECHO  Downloading patch_wm220_0306.py .. right now this is for Mavic only
+ECHO  Downloading dummy_verify.sh .. right now this is for Mavic only
 ECHO.
 ECHO ------------------------------------------------------------------------------
 IF EXIST "tools\dummy_verify.sh" (
@@ -313,6 +385,7 @@ copy %filename% tools
 copy 7z.exe tools
 copy image.py tools
 copy dummy_verify.sh tools
+copy FC_patch_sequence_for_dummy_verify.sh tools
 cd tools
 md fwextract
 7z.exe x %filename%
@@ -432,7 +505,7 @@ ECHO Selected file name: %filename3%
 copy w*.cfg.sig cfgn
 copy image.py cfgn
 del image.py
-del w*.sig
+REM del w*.sig
 GOTO WOO
 :WOO
 cd cfgn
@@ -686,7 +759,6 @@ CALL :RESOLVE4 %%file%selection%%%
 ECHO Selected file name: %filename4%
 python dji_flyc_param_ed.py -vv -x -b 0x420000 -m %filename4%
 copy %filename4% fwextract
-del dji_flyc_param_ed.py
 copy flyc_param_infos flyc_param_infos_stock_%acname%_%acversion%
 GOTO PARAMSFILE
 :PARAMSFILE
@@ -723,7 +795,7 @@ ECHO.
 ECHO ------------------------------------------------------------------------------
 TIMEOUT 2>nul
 set PATH_TO_TOOLS=C:\fcpatcher   
-REM MAKE SURE THIS MATCHES THE FOLDER YOU RAN BATCH FILE FROM
+REM ^^ MAKE SURE THIS MATCHES THE FOLDER YOU RAN BATCH FILE FROM
 PAUSE
 GOTO SEQ
 :SEQ
@@ -733,12 +805,24 @@ ECHO ---------------------------------------------------------------------------
 ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
 ECHO ------------------------------------------------------------------------------
 ECHO. 
-ECHO  We will now run the FC patch sequence for the dummy verify file
+ECHO  We will now run the FC patch sequence for the dummy verify 
 ECHO.
 ECHO ------------------------------------------------------------------------------
 PAUSE
+cd ..
+copy sh.exe tools
+copy dji_flyc_param_ed.py tools
+java -jar download.jar https://github.com/o-gs/DJI_FC_Patcher/blob/master/patch_wm220_0306.py patch_wm220_0306.py
+cd tools
+copy dji_flyc_param_ed.py fwextract
+copy patch_wm220_0306.py fwextract
+copy sh.exe fwextract
+copy FC_patch_sequence_for_dummy_verify.sh fwextract
+copy patcher.py fwextract
 cd fwextract
-FC_patch_sequence_for_dummy_verify.sh Mavic 03.02.44.08
+pause
+FC_patch_sequence_for_dummy_verify.sh Mavic 03.02.44.99
+REM FC_patch_sequence_for_dummy_verify.sh %acmodel% %buildversion%
 pause
 GOTO ADBINSTALLDUMMY
 :ADBINSTALLDUMMY
@@ -793,10 +877,6 @@ PAUSE
 adb root
 adb shell mount -o bind /vendor/bin/dummy_verify.sh /sbin/dji_verify
 cd ..
-cd tools
-copy FC_patch_sequence_for_dummy_verify.sh fwextract
-copy patcher.py fwextract
-copy patch_wm220_0306.py fwextract
 GOTO DDLL
 :DDLL
 CLS
@@ -812,7 +892,27 @@ ECHO  to accomplish the flashing process.
 ECHO.
 ECHO ------------------------------------------------------------------------------
 PAUSE
-GOTO DLDD
+GOTO DLDQ
+:DLDQ
+CLS
+ECHO.
+ECHO ------------------------------------------------------------------------------
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 
+ECHO ------------------------------------------------------------------------------
+ECHO. 
+ECHO  Do you want to run dumldore v3 to flash your device? 
+ECHO.
+ECHO. You will need to navigate to the location of the file in tools.
+ECHO.
+ECHO ------------------------------------------------------------------------------
+ECHO.
+SET /P M=Do you want to run dumldore to flash? Y/N: 
+IF %M%==Y GOTO DLDD
+IF %M%==y GOTO DLDD
+IF %M%==N GOTO CREDITS
+IF %M%==n GOTO CREDITS
+IF %M%==x GOTO EOF
+IF %M%==X GOTO EOF
 :DLDD
 CLS
 ECHO.
@@ -859,9 +959,6 @@ ECHO  the file and press flash firmware.
 ECHO.
 ECHO ------------------------------------------------------------------------------
 pause
-
-
-
 GOTO CREDITS
 :CREDITS
 CLS
