@@ -18,7 +18,7 @@
 
 if [[ -z "${PATH_TO_TOOLS}" ]]; then
   echo "Define PATH_TO_TOOLS variable to use this script! eg:"
-  echo "PATH_TO_TOOLS=/tmp/tools/ ./FC_patch_sequence_for_dummy_verify.sh"
+  echo "PATH_TO_TOOLS=cL\fcbatcher\tools\ ./FC_patch_sequence_for_dummy_verify.sh"
   exit 1
 fi
 
@@ -122,7 +122,7 @@ VERSIONSTR="v$VERSION"
 ORI_FILENAME="$AC_PREFIX"_"$MODULE"_v"$ORI_VERSION"_"$ORI_FILEDATE".pro.fw_"$MODULE".decrypted.bin
 DST_FILENAME_BASE="$AC_PREFIX"_"$MODULE"_v"$VERSION"_"$ORI_FILEDATE".pro.fw
 TMP_FILENAME0="$DST_FILENAME_BASE"_"$MODULE".decrypted.bin
-TMP_FILENAME1=tmp_"$TMP_FILENAME0"
+TMP_FILENAME1="$TMP_FILENAME0"  ## removed tmp_ digdat0
 TMP_ENCRYPTED="$DST_FILENAME_BASE"_"$MODULE".decrypted.encrypted.bin
 DST_FILENAME="$DST_FILENAME_BASE".sig
 
@@ -132,7 +132,7 @@ echo "##########################################################################
 echo "                       Updating flight parameters"
 echo "################################################################################"
 
-python dji_flyc_param_ed.py -vv -u -b 0x420000 -m $TMP_FILENAME1
+python dji_flyc_param_ed.py -vv -u -b 0x420000 -m $TMP_FILENAME1   ## Removed variable, assuming script run same folder
 
 if [ $? != 0 ]
 then
@@ -148,7 +148,7 @@ echo "               Adding U-Blox custom configuration"
 echo "################################################################################"
 
 # call it using python version 2
-python2 "patch_"$AC_PREFIX"_"$MODULE".py $TMP_FILENAME1 $VERSION
+python "patch_"$AC_PREFIX"_"$MODULE".py $TMP_FILENAME1 $VERSION
 if [ $? != 0 ]
 then
     echo "#### Issue while patching module ####"
