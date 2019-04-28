@@ -15,11 +15,15 @@ For info on parameters: http://dji.retroroms.info/howto/start
 Things / Tools Required to Run
 --------------------------------------------------------------
 Pyton2 https://www.python.org/downloads/release/python-2716/
+
 Python 3 https://www.python.org/ftp/python/3.7.3/python-3.7.3.exe
+
 Install Pcrypto+ConfigParser via PIP at command line:
   - python -m pip install pycryptodome
   - python -m pip install configparser
+
 JRE/JDK https://www.oracle.com/technetwork/java/javase/downloads/index.html
+
 Have root access (run dumlracer or dumldore get adb) 
   https://github.com/CunningLogic/DUMLRacer
   https://github.com/jezzab/DUMLdore
