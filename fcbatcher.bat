@@ -17,14 +17,14 @@ javac -version >nul 2>&1 && ( GOTO:MAIN
 SET APPVER=1.0
 SET ORIGDATE=April 18, 2019
 SET SAVEDATE=%DATE%
-SET BUILDVERSION=03.02.44.99
-SET SNUM=23
+SET BUILDVERSION=03.02.45.10
 REM change build version + versions when new builds to update
+SET SNUM=23
 @ECHO OFF
 CLS
 ECHO.
 ECHO -------------------------------------------------------------------------------------
-ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 			Step 1/%SNUM%
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 			
 ECHO -------------------------------------------------------------------------------------
 ECHO  The tool will assist in the FC Patcher process. The FC patcher "process"
 ECHO  was made by the OG's to help the community modify flight controller 
@@ -44,44 +44,7 @@ ECHO  Press the any key to proceed.
 ECHO. 
 ECHO -------------------------------------------------------------------------------------
 PAUSE
-GOTO MAINM
-:MAINM
-SET APPVER=1.0
-SET ORIGDATE=April 18, 2019
-SET SAVEDATE=%DATE%
-@ECHO OFF
-CLS
-ECHO.
-ECHO -------------------------------------------------------------------------------------------
-ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  			Step 2/%SNUM%
-ECHO -------------------------------------------------------------------------------------------
-ECHO. 
-ECHO  Select the firmawre you want to modify. Please make sure the .bin file
-ECHO  is in the same folder as this batch file.
-ECHO.
-ECHO -------------------------------------------------------------------------------------------
-ECHO.
-SET index=1
-SETLOCAL ENABLEDELAYEDEXPANSION
-FOR %%f IN (*.BIN) DO (
-   SET file!index!=%%f
-   ECHO   !index! - %%f
-   SET /A index=!index!+1
-)
-SETLOCAL DISABLEDELAYEDEXPANSION
-ECHO.
-SET /P selection="Select the firmware file: "
-SET file%selection% >nul 2>&1
-IF ERRORLEVEL 1 (
-   ECHO.
-   ECHO Invalid number selected
-   TIMEOUT 2   
-   GOTO MAIN
-)
-CALL :RESOLVE %%file%selection%%%
-ECHO Selected file name: %filename%
-copy %filename% tools
-GOTO MAIN2
+GOTO GOTROOT
 :RESOLVE
 SET filename=%1
 GOTO :EOF
@@ -97,22 +60,38 @@ GOTO :EOF
 :RESOLVE4
 SET filename4=%1
 GOTO :EOF
-:MAIN1
-REM Root functionality exists, but if you say No, then it doesnt detect the 305/306 files in the folder
-REM properly, so for now i just left the code but the tool moves around it and doesnt prompt 
+:GOTROOT
 CLS
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
-ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  			Step /%SNUM%
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  				Step 1/%SNUM%
 ECHO -------------------------------------------------------------------------------------------
 ECHO. 
-ECHO  Do you want to root your device? Say no if you have already rooted.
+ECHO  You need root / adb access. Do ya got it? If no, go run dumlracer
+ECHO.
+ECHO -------------------------------------------------------------------------------------------
+ECHO.
+SET /P M=Well, do ya got that root? Y/N: 
+IF %M%==Y GOTO MAINM
+IF %M%==y GOTO MAINM
+IF %M%==N GOTO MAIN1
+IF %M%==n GOTO MAIN1
+IF %M%==x GOTO EOF
+IF %M%==X GOTO EOF
+:MAIN1
+CLS
+ECHO.
+ECHO -------------------------------------------------------------------------------------------
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  				Step /%SNUM%
+ECHO -------------------------------------------------------------------------------------------
+ECHO. 
+ECHO  Do you want to run dumlracer and root your device? Say no if you have already rooted.
 ECHO.
 ECHO. If you dont know what this means, this tool may not be for you.
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
 ECHO.
-SET /P M=Do you want to root your device? Y/N: 
+SET /P M=Do you want to root your device? Y/N/X: 
 IF %M%==Y GOTO REWT
 IF %M%==y GOTO REWT
 IF %M%==N GOTO MAIN2
@@ -129,7 +108,7 @@ ECHO.
 ECHO  Downloading dumlracer
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
-IF EXIST "dumlracer.exe" (
+IF EXIST "dumlracer.jar" (
 GOTO DLDR
 ) ELSE (
 ECHO.
@@ -165,6 +144,43 @@ ECHO.
 ECHO -------------------------------------------------------------------------------------------
 ECHO.
 pause
+GOTO MAINM
+:MAINM
+SET APPVER=1.0
+SET ORIGDATE=April 18, 2019
+SET SAVEDATE=%DATE%
+@ECHO OFF
+CLS
+ECHO.
+ECHO -------------------------------------------------------------------------------------------
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  				Step 2/%SNUM%
+ECHO -------------------------------------------------------------------------------------------
+ECHO. 
+ECHO  Select the firmawre you want to modify. Please make sure the .bin file
+ECHO  is in the same folder as this batch file.
+ECHO.
+ECHO -------------------------------------------------------------------------------------------
+ECHO.
+SET index=1
+SETLOCAL ENABLEDELAYEDEXPANSION
+FOR %%f IN (*.BIN) DO (
+   SET file!index!=%%f
+   ECHO   !index! - %%f
+   SET /A index=!index!+1
+)
+SETLOCAL DISABLEDELAYEDEXPANSION
+ECHO.
+SET /P selection="Select the firmware file: "
+SET file%selection% >nul 2>&1
+IF ERRORLEVEL 1 (
+   ECHO.
+   ECHO Invalid number selected
+   TIMEOUT 2   
+   GOTO MAINM
+)
+CALL :RESOLVE %%file%selection%%%
+ECHO Selected file name: %filename%
+copy %filename% tools
 GOTO MAIN2
 :MAIN2
 for /f "tokens=1-3* delims=_" %%A in ('dir /b /a-d "%filename%"') do (
@@ -178,7 +194,7 @@ REM CALL :FILECHECK
 CLS
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
-ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  			Step 3/%SNUM%
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  				Step 3/%SNUM%
 ECHO -------------------------------------------------------------------------------------------
 ECHO. 
 ECHO  You have selected the following firmware, please confirm.
@@ -189,14 +205,19 @@ ECHO   Firmware Filename    : %filename%
 ECHO   Aircraft Type        : %acname%
 ECHO   Firmware Version     : %acversion%
 ECHO.
-ECHO   Hidden Testing Options: (E, D, A, P, Q, S, I)
-ECHO   ExtractBin, DumldoreDL, Adb1ststep, ParamsEdit, patch_seQuence, Setpath, Installdummy 
+ECHO   Testing Options: (E, D, A, P, Q, S, I, O)
+ECHO   (E)xtractBin, (D)umldoreDL, (A)db1ststep, (P)aramsEdit, patch_se(Q)uence, 
+ECHO   (S)etpath, (I)nstalldummy, d(O)wnload, repatch(F)c, (H)ardcode
 ECHO.
 SET /P M=Is this information right? Y/N: 
 IF %M%==Y GOTO MAIN3
 IF %M%==y GOTO MAIN3
 IF %M%==N GOTO MAIN
 IF %M%==n GOTO MAIN
+IF %M%==F GOTO patfc
+IF %M%==f GOTO patfc
+IF %M%==H GOTO HARDCODE
+IF %M%==h GOTO HARDCODE
 IF %M%==x GOTO EOF
 IF %M%==X GOTO EOF
 IF %M%==e GOTO EXTRACTBIN
@@ -211,6 +232,8 @@ IF %M%==Q GOTO SEQ REM FC_patch_sequence_for_dummy_verify.sh
 IF %M%==q GOTO SEQ
 IF %M%==s GOTO PATH 
 IF %M%==S GOTO PATH
+IF %M%==O GOTO DLDQ 
+IF %M%==o GOTO DLDQ
 IF %M%==i GOTO ADBINSTALLDUMMY  
 IF %M%==I GOTO ADBINSTALLDUMMY
 :MAIN3
@@ -222,7 +245,7 @@ GOTO DL1
 CLS
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
-ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  			Step 4/%SNUM%
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  				Step 4/%SNUM%
 ECHO -------------------------------------------------------------------------------------------
 ECHO. 
 ECHO  You don't have Python installed. Goto python.org and download python
@@ -234,7 +257,7 @@ EXIT
 CLS
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
-ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  			Step 4a/%SNUM%
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  				Step 4a/%SNUM%
 ECHO -------------------------------------------------------------------------------------------
 ECHO. 
 ECHO  Downloading image.py ..
@@ -253,7 +276,7 @@ GOTO DL2
 CLS
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
-ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 	 			Step 4b/%SNUM%
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER% 	 				Step 4b/%SNUM%
 ECHO -------------------------------------------------------------------------------------------
 ECHO. 
 ECHO  Downloading dji_mvfc_fwpak.py ..
@@ -272,7 +295,7 @@ GOTO DL3
 CLS
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
-ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  	 			Step 4c/%SNUM%
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  	 				Step 4c/%SNUM%
 ECHO -------------------------------------------------------------------------------------------
 ECHO. 
 ECHO  Downloading dji_flyc_param_ed.py ..
@@ -292,7 +315,7 @@ REM SKIPPING .sh below to have custom one
 CLS
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
-ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  	 			Step 4d/%SNUM%
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  	 				Step 4d/%SNUM%
 ECHO -------------------------------------------------------------------------------------------
 ECHO. 
 ECHO  Downloading FC_patch_sequence_for_dummy_verify.sh ..
@@ -311,7 +334,7 @@ GOTO DL5
 CLS
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
-ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  	 			Step 4e/%SNUM%
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  	 				Step 4e/%SNUM%
 ECHO -------------------------------------------------------------------------------------------
 ECHO. 
 ECHO  Downloading patcher.py ..
@@ -330,7 +353,7 @@ GOTO DL6
 CLS
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
-ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  	 			Step 4f/%SNUM%
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  	 				Step 4f/%SNUM%
 ECHO -------------------------------------------------------------------------------------------
 ECHO. 
 ECHO  Downloading patch_wm220_0306.py .. right now this is for Mavic only
@@ -349,7 +372,7 @@ GOTO DL7
 CLS
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
-ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  	 			Step 4g/%SNUM%
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  	 				Step 4g/%SNUM%
 ECHO -------------------------------------------------------------------------------------------
 ECHO. 
 ECHO  Downloading dummy_verify.sh .. 
@@ -368,7 +391,7 @@ GOTO DL8
 CLS
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
-ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  	 			Step 4h/%SNUM%
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  	 				Step 4h/%SNUM%
 ECHO -------------------------------------------------------------------------------------------
 ECHO. 
 ECHO  Downloading DUMLdoreV3 .. 
@@ -387,7 +410,7 @@ GOTO DL9
 CLS
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
-ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  	 			Step 4i/%SNUM%
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  	 				Step 4i/%SNUM%
 ECHO -------------------------------------------------------------------------------------------
 ECHO. 
 ECHO  Downloading UBXCFGGEN.py .. 
@@ -406,7 +429,7 @@ GOTO EXTRACTBIN
 CLS
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
-ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  	 			Step 5/%SNUM%
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%  	 				Step 5/%SNUM%
 ECHO -------------------------------------------------------------------------------------------
 ECHO. 
 ECHO  We will now do some work to extract the firmware files (cfg, 305 and 306). 
@@ -416,8 +439,7 @@ ECHO  together.
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
 PAUSE
-REM TIMEOUT 2 >nul // will pause rather than timeout to allow reading
-ECHO OFF
+@echo off
 REM md final
 copy %filename% tools
 copy 7z.exe tools
@@ -433,7 +455,6 @@ copy dji_mvfc_fwpak.py fwextract
 copy *306*.* fwextract
 copy *w*.cfg.sig fwextract
 copy image.py fwextract
-copy python.exe fwextreact
 del %filename%
 del *.sig
 del image.py
@@ -444,7 +465,9 @@ md 306
 md cfgn
 GOTO 305MOD
 :305MOD
+@echo off
 copy *305*.* 305
+copy *306*.* 306
 cd 305
 CLS
 ECHO.
@@ -471,10 +494,11 @@ IF ERRORLEVEL 1 (
    ECHO.
    ECHO Invalid number selected
    TIMEOUT 2   
-   GOTO MAIN
+   GOTO 305MOD
 )
 CALL :RESOLVE1 %%file%selection%%%
 ECHO Selected file name: %filename1%
+copy %filename1% ..
 cd ..
 del *305*.*
 TIMEOUT 2 >nul
@@ -505,7 +529,7 @@ IF ERRORLEVEL 1 (
    ECHO.
    ECHO Invalid number selected
    TIMEOUT 2   
-   GOTO MAIN
+   GOTO M306
 )
 CALL :RESOLVE2 %%file%selection%%%
 ECHO Selected file name: %filename2%
@@ -539,7 +563,7 @@ IF ERRORLEVEL 1 (
    ECHO.
    ECHO Invalid number selected
    TIMEOUT 2   
-   GOTO MAIN
+   GOTO MCFGN
 )
 CALL :RESOLVE3 %%file%selection%%%
 ECHO Selected file name: %filename3%
@@ -577,33 +601,39 @@ cd ..
 GOTO 305FOLDERS
 :305FOLDERS
 cd 305
-for /f "tokens=1-3* delims=_" %%A in ('dir /b /a-d "%filename1%"') do (
+ren *pro.fw.sig *.
+ren *pro.fw *.
+ren *pro *.
+REM renaming to remove the extension, allows setting %%~D otherwie it appends and i cant get date for future use
+for /f "tokens=1-4* delims=_" %%A in ('dir /b /a-d "%filename1%"') do (
   set filenamespec=%%~A_%%~B_%%~C_%%~D
   set acmodel=%%~A
   set acmodule1=%%~B
   set acversion305=%%~C
   set miscfiledate=%%~D
 )
-copy *305*.* ..
-del *305*.*
+ren *_*_*.*.*.*_* *_*.pro.fw.sig
+copy *.sig ..
+del *.sig
 cd ..
 GOTO 306FOLDERS
 :306FOLDERS
-for /f "tokens=1-3* delims=_" %%A in ('dir /b /a-d "%filename2%"') do (
+cd 306
+ren *pro.fw.sig *.
+ren *pro.fw *.
+ren *pro *.
+for /f "tokens=1-4* delims=_" %%A in ('dir /b /a-d "%filename2%"') do (
   set filenamespec=%%~A_%%~B_%%~C_%%~D
   set acmodel2=%%~A
   set acmodule2=%%~B
   set acversion306=%%~C
   set miscfiledate2=%%~D
 )
+ren *_*_*.*.*.*_* *_*.pro.fw.sig
+copy *.sig ..
+del *.sig
 GOTO MOVEIT
 :MOVEIT
-cd 306
-copy *306*.* ..
-del *306*.*
-cd ..
-copy *306*.* ..
-del *306*.*
 cd ..
 copy *306*.* ..
 del *306*.*
@@ -752,9 +782,10 @@ ECHO.
 ECHO -------------------------------------------------------------------------------------------
 ECHO.
 pause
-ECHO OFF
+@ECHO OFF
 copy 0306.unsig ..
-REM ADD BACK LATER WHEN REAL TEST **** del 0306.unsig
+REM ADD BACK LATER  
+REM del 0306.unsig
 cd ..
 copy 0306.unsig tools
 del 0306.unsig
@@ -765,8 +796,10 @@ del 0306.unsig
 ren 0306.decrypted.bin %filename2%
 ren *pro.fw.sig *.
 ren *pro.fw *.fw_0306.decrypted.bin
+copy *.fw_0306.decrypted.bin fwextract
 GOTO DECFC1
 :DECFC1
+@ECHO OFF
 CLS
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
@@ -794,13 +827,18 @@ IF ERRORLEVEL 1 (
    ECHO.
    ECHO Invalid number selected
    TIMEOUT 2   
-   GOTO MAIN
+   GOTO DECFC1
 )
 CALL :RESOLVE4 %%file%selection%%%
 ECHO Selected file name: %filename4%
 python dji_flyc_param_ed.py -vv -x -b 0x420000 -m %filename4%
 copy %filename4% fwextract
 copy flyc_param_infos flyc_param_infos_stock_%acname%_%acversion%
+cd ..
+copy python.exe tools
+cd tools
+copy python.exe fwextract
+del python.exe
 GOTO PARAMSFILE
 :PARAMSFILE
 CLS
@@ -819,58 +857,111 @@ ECHO.
 ECHO -------------------------------------------------------------------------------------------
 ECHO.
 PAUSE
+@ECHO OFF
 notepad.exe flyc_param_infos
 copy flyc_param_infos flyc_param_infos_modded_%acname%_%acversion%
+move flyc_param_infos_modded_%acname%_%acversion% ..
+del flyc_param_infos_modded_%acname%_%acversion%
 copy flyc_param_infos fwextract
+copy %filename1% fwextract
 del flyc_param_infos
-GOTO PATH
-:PATH
-CLS
-ECHO.
-ECHO -------------------------------------------------------------------------------------------
-ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%   	 			Step 14/%SNUM%
-ECHO -------------------------------------------------------------------------------------------
-ECHO. 
-ECHO  We are now attempting to set the path to the folder batch file was ran
-ECHO.
-ECHO -------------------------------------------------------------------------------------------
-TIMEOUT 2>nul
-set PATH_TO_TOOLS=C:\fcpatcher   
-REM ^^ MAKE SURE THIS MATCHES THE FOLDER YOU RAN BATCH FILE FROM
-PAUSE
-GOTO SEQ
-:SEQ
+cd ..
+copy sh.exe tools
+copy tar.exe tools
+copy patcher.py tools
+copy dji_flyc_param_ed.py tools
+java -jar download.jar https://github.com/o-gs/DJI_FC_Patcher/raw/master/patch_wm220_0306.py patch_wm220_0306.py
+cd tools
+copy tar.exe fwextract
+copy sh.exe fwextract
+copy UBXCFGGEN.py fwextract
+copy dji_flyc_param_ed.py fwextract
+copy patcher.py fwextract
+copy patch_wm220_0306.py fwextract
+copy sh.exe fwextract
+copy patcher.py fwextract
+copy FC_patch_sequence_for_dummy_verify.sh fwextract
+cd fwextract
+REM moving some commands over from the .sh file, it driving me nutts
+GOTO PATFC
+:PATFC
 CLS
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
 ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%   	 			Step 15/%SNUM%
 ECHO -------------------------------------------------------------------------------------------
 ECHO. 
-ECHO  We will now run the FC patch sequence for the dummy verify 
+ECHO  We will now patch the flight controller 306 module
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
 PAUSE
+@ECHO OFF
+python dji_flyc_param_ed.py -vv -u -b 0x420000 -m %filename4%
+GOTO HARDCODE
+:HARDCODE
+@echo off
+CLS
+ECHO.
+ECHO -------------------------------------------------------------------------------------------
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%   	 			Step 15a/%SNUM%
+ECHO -------------------------------------------------------------------------------------------
+ECHO. 
+ECHO  We will now patch the hard coded values using patch_%acmodel3%_0306.py
+ECHO.
+ECHO -------------------------------------------------------------------------------------------
+PAUSE
+md patch
+copy %filename4% patch
+copy *.fw_0306.decrypted.bin patch
+copy %filename1% patch
+copy python.exe patch
+copy flyc_param_infos patch
+copy patcher.py patch
+copy %acmodel3%.cfg.ori patch
+copy UBXCFGGEN.py patch
+copy patch_%acmodel3%_0306.py patch
+dir
+pause
+cd patch
+dir
+pause
+python patch_%acmodel3%_0306.py %filename4% %BUILDVERSION%
+pause
+dir
+pause
+move %filename4% %filename4%_old
+move *.patched %filename2%
+dir
+pause
+copy %filename2% ..
 cd ..
-copy python.exe tools
-copy sh.exe tools
-copy tar.exe tools
-copy dji_flyc_param_ed.py tools
-java -jar download.jar https://github.com/o-gs/DJI_FC_Patcher/raw/master/patch_wm220_0306.py patch_wm220_0306.py
-cd tools
-copy python.exe fwextract
-copy tar.exe fwextract
-copy UBXCFGGEN.py fwextract
-del python.exe
-copy dji_flyc_param_ed.py fwextract
-copy patch_wm220_0306.py fwextract
-copy sh.exe fwextract
-copy FC_patch_sequence_for_dummy_verify.sh fwextract
-copy patcher.py fwextract
-cd fwextract
+dir
 pause
-FC_patch_sequence_for_dummy_verify.sh Mavic 03.02.44.99
-REM FC_patch_sequence_for_dummy_verify.sh %acmodel% %buildversion%
-pause
+FC_patch_sequence_for_dummy_verify.sh Mavic %BUILDVERSION%
+move 
+patched
+REM FC_patch_sequence_for_dummy_verify.sh %acmodel% %BUILDVERSION%
+REM add logic to pull Mavic name from wm220 or other models once more supported
+copy *_dummy_verify.bin ..
+cd ..
+copy *_dummy_verify.bin ..
+GOTO STATUS
+:STATUS
+CLS
+ECHO.
+ECHO -------------------------------------------------------------------------------------------
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%   	 			Step 15b/%SNUM%
+ECHO -------------------------------------------------------------------------------------------
+ECHO. 
+ECHO  You now have a custom firmware which can be used to flash your aicraft. 
+ECHO  In the same folder as the fcbatcher.bat file was found will be a new file named
+ECHO  dji_system_%acmodel3%_0306_v%BUILDVERSION%_dummy_verify.bin
+ECHO.  
+ECHO  When you get to flashing, use dji_system_%acmodel3%_0306_v%BUILDVERSION%_dummy_verify.bin
+ECHO. 
+ECHO.
+ECHO -------------------------------------------------------------------------------------------
+PAUSE
 GOTO ADBINSTALLDUMMY
 :ADBINSTALLDUMMY
 CLS
@@ -883,7 +974,7 @@ ECHO  This step will install the dummy_verify.sh file on the aircraft. This will
 ECHO  allow you to install your customized firmware.
 ECHO.
 ECHO  Now we need to connect to the aircraft. Plug it in via USB and power on (if
-ECHO  the aircraft isnt already on.
+ECHO  the aircraft isnt already on).
 ECHO.
 ECHO  After plugging in, wait about 30 seconds for the computer to recognize it. DO
 ECHO  not close this window. Do not power off the %acname%
@@ -913,10 +1004,8 @@ ECHO ---------------------------------------------------------------------------
 ECHO. 
 ECHO  We are pretty sure we managed to copy the right stuff to the %acname%
 ECHO.
-ECHO  Please turn off the aircraft. Leave the USB plugged in.
+ECHO  Please keep the aircraft on. Leave the USB plugged in.
 ECHO. 
-ECHO. Turn the %acname% back on. After about 30-60 seconds, press any key to continue.
-ECHO.
 ECHO  This step will initiate the dummy verify to allow flashing.
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
@@ -938,7 +1027,53 @@ ECHO  your %acname% with the .bin file we created. You can use dumldore or dumlf
 ECHO  to accomplish the flashing process.
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
-PAUSE
+GOTO CLEAN
+:CLEAN
+CLS
+ECHO.
+ECHO -------------------------------------------------------------------------------------------
+ECHO  FC Patcher Batcher -- Firmware Mod Tool %APPVER%   	 			Step 18b/%SNUM%
+ECHO -------------------------------------------------------------------------------------------
+ECHO. 
+ECHO  Cleaning up a bit ...
+ECHO.
+ECHO -------------------------------------------------------------------------------------------
+cd tools
+cd fwextract
+cd 306
+del *.py
+cd ..
+rd 306
+cd patch
+del *.sig
+del p*.*
+del U*.*
+del *.bin
+cd ..
+rd patch
+del *.py
+del *.exe
+del *.sh
+del *.sig
+del *.ori
+del *.cfg
+del *.bin
+del flyc_param_infos
+cd ..
+rd fwextract
+cd unzip
+del *.exe
+cd ..
+del adb*
+del *.py
+del *.exe
+del *.sh
+del *.sig
+del *.ori
+del *.cfg
+del *.bin
+cd ..
+rd tools
 GOTO DLDQ
 :DLDQ
 CLS
@@ -961,6 +1096,7 @@ IF %M%==n GOTO CREDITS
 IF %M%==x GOTO EOF
 IF %M%==X GOTO EOF
 :DLDD
+cd tools
 CLS
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
@@ -970,7 +1106,7 @@ ECHO.
 ECHO  Downloading dumldore3
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
-IF EXIST "dumldore3.exe" (
+IF EXIST "dumldore3.zip" (
 GOTO DLDR
 ) ELSE (
 ECHO.
@@ -990,9 +1126,10 @@ ECHO.
 ECHO  Extracting files and running dumldore tool
 ECHO.
 ECHO -------------------------------------------------------------------------------------------
+cd ..
 copy 7z.exe tools
 cd tools
-7z.exe x dumldorev3.zip
+7z.exe x DUMLdoreV3.zip
 start dumldorev3.exe
 TIMEOUT 2 >nul
 CLS
