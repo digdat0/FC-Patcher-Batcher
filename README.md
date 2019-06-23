@@ -31,11 +31,9 @@ Have root access (run dumlracer or dumldore get adb)
 
 
 
-04/22/2019 - KNOWN ISSUES
+06/22/2019 - KNOWN ISSUES
 --------------------------------------------------------------
-- it works up to patch_wm220_0306.py, working on it
 - Delete the 'tools' folder between runs
-- some filecopy/deletes not working
-- ALL adb untested!!!!!!!! its theoretical
-- root flow causing issues with 305/306 not showing up, removed for now
-- only m1p support
+- some filecopy/deletes not working but doesnt affect outcome
+- ALL adb tested except dji_Verify steps
+- only mavic 1 support
