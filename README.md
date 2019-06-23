@@ -24,10 +24,11 @@ Install Pcrypto+ConfigParser via PIP at command line:
 
 JRE/JDK https://www.oracle.com/technetwork/java/javase/downloads/index.html
 
-Have root access (run dumlracer or dumldore get adb) 
+7zip installed https://www.7-zip.org/download.html
+
+Have root access (run dumlracer or dumldore enable adb) 
   https://github.com/CunningLogic/DUMLRacer
   https://github.com/jezzab/DUMLdore
-
 
 
 
