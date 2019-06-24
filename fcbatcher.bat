@@ -920,26 +920,13 @@ copy patcher.py patch
 copy %acmodel3%.cfg.ori patch
 copy UBXCFGGEN.py patch
 copy patch_%acmodel3%_0306.py patch
-dir
-pause
 cd patch
-dir
-pause
 python patch_%acmodel3%_0306.py %filename4% %BUILDVERSION%
-pause
-dir
-pause
 move %filename4% %filename4%_old
 move *.patched %filename2%
-dir
-pause
 copy %filename2% ..
 cd ..
-dir
-pause
 FC_patch_sequence_for_dummy_verify.sh Mavic %BUILDVERSION%
-move 
-patched
 REM FC_patch_sequence_for_dummy_verify.sh %acmodel% %BUILDVERSION%
 REM add logic to pull Mavic name from wm220 or other models once more supported
 copy *_dummy_verify.bin ..
