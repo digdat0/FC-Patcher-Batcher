@@ -3,6 +3,7 @@ FC Patcher Batcher
 This is a wrapper batch file which uses tools other developrs made. My intention is to make this easier; All credit to all the OG's, Matioupi, mefistotelis, fvantienen, jcase, jezzab, jan and anyone else involved. Please review the source and please give all credit and or donations to the folk who created the tools. 
 
 https://github.com/o-gs/DJI_FC_Patcher
+
 https://github.com/o-gs/dji-firmware-tools                                       
                                        
 --------------------------------------------
